@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "453896355491",
+    "project_id": "dsis-7ca4c",
+    "storage_bucket": "dsis-7ca4c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453896355491:android:abb1697a0a7ded4683c916",
+        "android_client_info": {
+          "package_name": "com.bprldr.dsis_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "453896355491-hnukflj98od1ts55u081rlq8673grjlq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8ImXBaVvPxi4bBxmoMnZryboMntnA6Gw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "453896355491-hnukflj98od1ts55u081rlq8673grjlq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
