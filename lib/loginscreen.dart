@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  late String studentNo, password;
+  late String email, password;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: <Widget>[
               TextFormField(
                 validator: (input)  => input!.isEmpty ? 'Please enter your email' : null,
-                onSaved: (input) => studentNo = input!,
+                onSaved: (input) => email = input!,
                 decoration: const InputDecoration(
                   labelText: 'Email',
                 ),
@@ -71,39 +71,22 @@ class _LoginScreenState extends State<LoginScreen> {
   void signIn() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-      try {
-        final studentDoc = await FirebaseFirestore.instance
-            .collection('students')
-            .doc(studentNo)
-            .get();
-        if (!studentDoc.exists) {
-          Fluttertoast.showToast( 
-            msg: 'User not found. Please sign up first!',
+
+        try {
+          UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
+          User? user = userCredential.user;
+          Fluttertoast.showToast(
+            msg: 'Sign in successful!',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.TOP,
             timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.green,
             textColor: Colors.white,
-            fontSize: 16.0,
+            fontSize: 16.0
           );
-          return;
+          Navigator.pushReplacementNamed(context, "/home", arguments: {'user': user });
         }
-        final studentData = studentDoc.data()!;
-        final studentEmail = studentData['email'] as String;
-
-        UserCredential userCredential = await auth.signInWithEmailAndPassword(email: studentEmail, password: password);
-        User? user = userCredential.user;
-        Fluttertoast.showToast(
-          msg: 'Sign in successful!',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-          fontSize: 16.0
-        );
-        Navigator.pushReplacementNamed(context, "/home", arguments: {'user': user });
-      } on FirebaseAuthException catch (e) {
+        on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {
           Fluttertoast.showToast(
               msg: 'User not found. Please sign up first!',

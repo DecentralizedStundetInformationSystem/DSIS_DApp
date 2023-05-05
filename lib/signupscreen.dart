@@ -2,6 +2,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -12,8 +14,9 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController idController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailcontroller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,9 +28,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Column(
           children: [
             TextFormField(
-              controller: emailController,
+              controller: emailcontroller,
               decoration: const InputDecoration (labelText: 'Email'),
-              validator: (input) => input!.isEmpty ? 'Please enter your email' : null,
+              validator: (input) => input!.isEmpty ? 'Please enter your school email' : null,
+            ),
+            TextFormField(
+              controller: idController,
+              decoration: const InputDecoration (labelText: 'ID'),
+              validator: (input) => input!.isEmpty ? 'Please enter your school ID' : null,
             ),
             TextFormField(
               controller: passwordController,
@@ -35,46 +43,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
               validator: (input) => input!.isEmpty ? 'Please enter a password' : null,
             ),
             const SizedBox(height: 20,),
-            ElevatedButton(onPressed: () async {
+            ElevatedButton(
+            onPressed: () async {
               if (formKey.currentState!.validate()) {
-                try {
-                  UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                    email: emailController.text,
-                    password: passwordController.text,
-                  );
-                  String uid = userCredential.user!.uid;
-                  await FirebaseFirestore.instance.collection('students').doc(uid).set({
-                    'email': emailController.text,
-                  });
-                  Navigator.pop(context);
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    Fluttertoast.showToast(
-                        msg: 'The password is weak!',
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.TOP,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0
+                String email = emailcontroller.text;
+                List<String> parts = email.split('@');
+                String username = parts[0];
+                List<String> nameParts = username.split('.');
+                String name = nameParts.join(' ');
+                var response = await http.post(
+                  Uri.parse('https://dsisapp.cyclic.app/signup'),
+                  body: {
+                    'name': name,
+                    'schoolId': idController.text,
+                  },
+                );
+
+                if (response.statusCode == 200) {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: emailcontroller.text,
+                      password: passwordController.text,
                     );
-                  } else if (e.code == 'email-already-in-use') {
-                    Fluttertoast.showToast(
-                        msg: 'This email is already in use!',
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.TOP,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0
-                    );
+
+                    Navigator.pop(context);
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      Fluttertoast.showToast(
+                          msg: 'The password is weak!',
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.TOP,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
+                    } else if (e.code == 'email-already-in-use') {
+                      Fluttertoast.showToast(
+                          msg: 'This email is already in use!',
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.TOP,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
+                    }
+                  } catch (e) {
+                    print(e);
                   }
-                } catch (e) {
-                  print(e);
                 }
               }
-            },
-                child: Text('Sign up'))
+            }, 
+                child: Text('Sign up'),
+            ),
           ],
         ),
       ),
