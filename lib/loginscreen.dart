@@ -20,49 +20,91 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Login"),
-      ),
       body: Center(
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextFormField(
-                validator: (input)  => input!.isEmpty ? 'Please enter your email' : null,
-                onSaved: (input) => email = input!,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Image.asset(
+              'assets/images/logo.png',
+              height: 90,
+            ),
+            Image.asset(
+              'assets/images/info.png',
+              height: 40,
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextFormField(
+                      validator: (input) => input!.isEmpty
+                          ? 'Please enter your email'
+                          : null,
+                      onSaved: (input) => email = input!,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Email',
+                      ),
+                    ),
+                    const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 0, 
+                            vertical: 6)
+                    ),
+                    TextFormField(
+                      validator: (input) => input!.isEmpty
+                          ? 'Please enter your password'
+                          : null,
+                      onSaved: (input) => password = input!,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Password',
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              TextFormField(
-                validator: (input) => input!.isEmpty ? 'Please enter your password' : null,
-                onSaved: (input) => password = input!,
-                obscureText: true,
-                decoration: const InputDecoration(    
-                    labelText: 'PAssword'
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  fixedSize: const Size(200, 60),
+              ),
+              onPressed: () {
+                signIn();
+              },
+              child: const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16
+                  )
+              )
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                fixedSize: const Size(200, 30)
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                );
+              },
+              child: const Text('Activate My Account',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold
                 ),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                child: Text('Sign In'),
-                onPressed: () {
-                  signIn();
-                },
-              ),
-              SizedBox(height: 20),
-              TextButton(
-                child: Text('Don\'t have an account? Sign up'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -71,7 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void signIn() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-
         try {
           UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
           User? user = userCredential.user;
