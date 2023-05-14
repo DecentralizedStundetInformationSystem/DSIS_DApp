@@ -1,8 +1,10 @@
-import 'package:dsis_app/signupscreen.dart';
+import 'package:dsis_app/design_screen.dart';
+import 'package:dsis_app/sign_up_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:dsis_app/loginscreen.dart';
-
+import 'package:dsis_app/log_in_screen.dart';
+import 'package:dsis_app/home_screen.dart';
+import 'package:dsis_app/design_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -23,15 +25,10 @@ class MyApp extends StatelessWidget {
       title: 'My App',
       initialRoute: '/',
       routes: {
-        '/': (context) => Scaffold(
-          body: Column(
-            children:[ ElevatedButton(onPressed: () { 
-              showPasswordDialog(context);}, child: Text('')
-            ),
-    ]
-          ),
-        ),
+        '/': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
+        '/home': (context) => HomeScreen(),
+        /*'/design': (context) => DesignClass(),*/
       },
       theme: ThemeData(
         fontFamily: 'iAWriterDuoS',
@@ -39,14 +36,14 @@ class MyApp extends StatelessWidget {
           displayLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           displayMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           bodyLarge: TextStyle(fontSize: 16),
-          bodyMedium: TextStyle(fontSize: 14),
-          bodySmall: TextStyle(fontSize: 12),
+          bodyMedium: TextStyle(fontSize: 10),
+          bodySmall: TextStyle(fontSize: 10),
         ),
-        scaffoldBackgroundColor: const Color(0xFF1e1e2e),
+        scaffoldBackgroundColor: const Color(0xFF11111b),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF74c7ec),
           secondary: Color(0xFF94e2d5),
-          surface: Color(0xFF313244),
+          surface: Color(0xFF181825),
           onBackground: Color(0xFFCDD6F4),
           onError: Color(0xFFCDD6F4),
           onPrimary: Color(0xFF313244),
@@ -60,7 +57,25 @@ class MyApp extends StatelessWidget {
           onPrimaryContainer: Color(0xFF181825),
           secondaryContainer: Color(0xFF89b4fa),
           onSecondaryContainer: Color(0xFF181825),
+          outline: Color(0xFFef9f76)
         ),
+        inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+            ),
+            focusColor: Theme.of(context).colorScheme.primary,
+          floatingLabelAlignment: FloatingLabelAlignment.center
+        ),
+        buttonTheme: ButtonThemeData(
+          colorScheme: Theme.of(context).colorScheme,
+          height: 30,
+          minWidth: 200,
+        ),
+        elevatedButtonTheme: const ElevatedButtonThemeData(
+          style: ButtonStyle(
+            fixedSize: MaterialStatePropertyAll(Size(200, 30)),
+          )
+        )
       ),
     );
   }
