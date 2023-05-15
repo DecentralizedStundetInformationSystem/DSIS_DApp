@@ -170,7 +170,10 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         });
         Navigator.pushReplacementNamed(
-            context, "/home", arguments: {'user': user});
+            context, "/home", arguments: {
+          'tag': 'user',
+          'data': user,
+        },);
       } on FirebaseAuthException catch (e) {
         setState(() {
           _isLoading = false;

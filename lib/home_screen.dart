@@ -9,6 +9,8 @@ import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dsis_app/contract_classes.dart';
+import 'package:dsis_app/semester_grades.dart';
+
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -17,8 +19,19 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
   
 }
-
+final List<Color> borderColors = [
+  const Color(0xFF74c7ec),
+  const Color(0xFFcba6f7),
+  const Color(0xFFeba0ac),
+  const Color(0xFFfab387),
+  const Color(0xFFe5c890),
+  const Color(0xFFa6d189),
+  const Color(0xFF99d1db),
+  const Color(0xFF8caaee),
+  const Color(0xFFbabbf1),
+];
 bool _isLoading = true;
+
 class _HomeScreenState extends State<HomeScreen> {
   late User user;
   late String contractAddress;
@@ -44,17 +57,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Student> initStudent() async {
-    late User user;
+    print('called this method');
     _isLoading = true;
     await dotenv.load();
     projectURL = dotenv.env['PROJECT_URL']!;
-    final args =
-    ModalRoute
-        .of(context)
-        ?.settings
-        .arguments as Map<String, dynamic>?;
+    final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null) {
-      user = args['user'] as User;
+      if (args['tag'] == 'user') {
+        // User object was passed
+        user = args['data'] as User;
+        // Do something with user object
+      } else if (args['tag'] == 'student') {
+        // Student object was passed
+        student = args['data'] as Student;
+        return student;
+        // Do something with student object
+      }
     }
     print('started the init student method');
     httpClient = Client();
@@ -65,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String termFile = await rootBundle.loadString("assets/contracts/term.json");
     String courseFile = await rootBundle.loadString(
         "assets/contracts/course.json");
+    print('got contract');
     var contract = DeployedContract(
         ContractAbi.fromJson(studentFile, 'Student'),
         EthereumAddress.fromHex(contractAddress));
@@ -99,13 +118,17 @@ class _HomeScreenState extends State<HomeScreen> {
       params: [],
     );
     List<Term> termList = [];
+    print(result);
     List<String> arr =
-    result[0].toString().replaceAll('[', '').replaceAll(']', '').split(',');
+    result[0].toString().replaceAll('[', '').replaceAll(']', '').replaceAll(' ', '').split(',');
+    print(arr);
     for (int i = 0; i < arr.length; i++) {
+      print(arr[i]);
+      print('creating term');
       var termContract = DeployedContract(
           ContractAbi.fromJson(termFile, 'Term'),
           EthereumAddress.fromHex(
-              result[0].toString().replaceAll('[', '').replaceAll(']', '')));
+              arr[i].toString().replaceAll('[', '').replaceAll(']', '')));
       var termYear = await ethClient.call(
           contract: termContract,
           function: termContract.function('year'),
@@ -124,70 +147,75 @@ class _HomeScreenState extends State<HomeScreen> {
           .replaceAll(']', '')
           .split(',');
       List<Course> courses = [];
-      for (int i = 0; i < termCourseList.length; i++) {
-        var courseContract = DeployedContract(
-            ContractAbi.fromJson(courseFile, 'Course'),
-            EthereumAddress.fromHex(
-                termCourseList[i].toString().replaceAll(' ', '')));
-        var courseName = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('name'),
-            params: []);
-        var courseID = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('courseID'),
-            params: []);
-        var courseCode = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('courseCode'),
-            params: []);
-        var courseInstructor = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('instructor'),
-            params: []);
-        var courseCredit = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('credit'),
-            params: []);
-        var courseOverallGrade = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('overallGrade'),
-            params: []);
-        var courseLetterGrade = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('letterGrade'),
-            params: []);
-        var courseEvalCount = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('evaluationCount'),
-            params: []);
-        var courseResultContents = await ethClient.call(
-            contract: courseContract,
-            function: courseContract.function('getEvaluationCriteria'),
-            params: []);
-        var courseResult = courseResultContents[0];
-        List<EvaluationCriterion> evaluationCriteria = [];
-        for (int i = 0; i < int.parse(courseEvalCount[0].toString()); i++) {
-          EvaluationCriterion evaluationCriterion = EvaluationCriterion(
-              courseResult[i][0].toString(),
-              int.parse(courseResult[i][1].toString()),
-              int.parse(courseResult[i][2].toString()));
-          evaluationCriteria.add(evaluationCriterion);
+      print('got course');
+      print(termCourseList.length);
+      print(termCourseList);
+      if(termCourseList[0].toString() != ''){
+        for (int i = 0; i < termCourseList.length; i++) {
+          var courseContract = DeployedContract(
+              ContractAbi.fromJson(courseFile, 'Course'),
+              EthereumAddress.fromHex(
+                  termCourseList[i].toString().replaceAll(' ', '')));
+          var courseName = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('name'),
+              params: []);
+          var courseID = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('courseID'),
+              params: []);
+          var courseCode = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('courseCode'),
+              params: []);
+          var courseInstructor = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('instructor'),
+              params: []);
+          var courseCredit = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('credit'),
+              params: []);
+          var courseOverallGrade = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('overallGrade'),
+              params: []);
+          var courseLetterGrade = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('letterGrade'),
+              params: []);
+          var courseEvalCount = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('evaluationCount'),
+              params: []);
+          var courseResultContents = await ethClient.call(
+              contract: courseContract,
+              function: courseContract.function('getEvaluationCriteria'),
+              params: []);
+          var courseResult = courseResultContents[0];
+          List<EvaluationCriterion> evaluationCriteria = [];
+          for (int i = 0; i < int.parse(courseEvalCount[0].toString()); i++) {
+            EvaluationCriterion evaluationCriterion = EvaluationCriterion(
+                courseResult[i][0].toString(),
+                int.parse(courseResult[i][1].toString()),
+                int.parse(courseResult[i][2].toString()));
+            evaluationCriteria.add(evaluationCriterion);
+          }
+          BigInt courseIDValue = BigInt.parse(courseID[0].toString());
+          BigInt courseCreditValue = BigInt.parse(courseCredit[0].toString());
+          BigInt courseEvalValue = BigInt.parse(courseEvalCount[0].toString());
+          Course course = Course(
+              courseName[0].toString(),
+              courseIDValue.toInt(),
+              courseCode[0].toString(),
+              courseInstructor[0].toString(),
+              courseCreditValue.toInt(),
+              courseEvalValue.toInt(),
+              evaluationCriteria,
+              courseOverallGrade[0].toString(),
+              courseLetterGrade[0].toString());
+          courses.add(course);
         }
-        BigInt courseIDValue = BigInt.parse(courseID[0].toString());
-        BigInt courseCreditValue = BigInt.parse(courseCredit[0].toString());
-        BigInt courseEvalValue = BigInt.parse(courseEvalCount[0].toString());
-        Course course = Course(
-            courseName[0].toString(),
-            courseIDValue.toInt(),
-            courseCode[0].toString(),
-            courseInstructor[0].toString(),
-            courseCreditValue.toInt(),
-            courseEvalValue.toInt(),
-            evaluationCriteria,
-            courseOverallGrade[0].toString(),
-            courseLetterGrade[0].toString());
-        courses.add(course);
       }
       BigInt termYearValue = BigInt.parse(termYear[0].toString());
       Term term = Term(
@@ -200,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
         name[0].toString(), studentIDValue.toInt(), faculty[0].toString(),
         department[0].toString(), studentRegYearValue.toInt(), termList);
     print('stundet object created, returning');
-
+    print(student.terms.length);
     setState(() {
       _isLoading = false;
     });
@@ -240,11 +268,48 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 1,
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: _isLoading ? const Text('') : Text(student.name),
-        leading: IconButton(
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
                 icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
+            onPressed: () {
+            Scaffold.of(context).openDrawer();
+            },
+          );
+          },
+          ),
+      ),
+      drawer: Drawer(
+        width: screenWidth * 0.6,
+        backgroundColor: const Color(0xFF1e1e2e),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+             Padding(
+               padding: EdgeInsets.all(screenHeight * 0.08),
+               child: Image.asset(
+                 'assets/images/logo.png',
+               ),
+             ),
+            ListTile(
+              title: const Text('Semester Grades'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SemesterGrades(),
+                    settings: RouteSettings(arguments: student),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('Transcript'),
+              onTap: () {
+                // Implement action for Item 2 here
+              },
+            ),
+          ],
         ),
       ),
       body: _isLoading
@@ -259,37 +324,42 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 100,
             child: CircularProgressIndicator())),
       )
-          : Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Center(
+          : SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   OrangeBox(
                     width: screenWidth * 1,
                     height: screenHeight * 0.2,
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('ID : ${student.id}'),
-                              Text('Faculty: Faculty of ${student.faculty}'),
-                            ],
+                          Expanded(
+                            flex: 6,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Department:\n${student.department}'),
+                                Text('Faculty:\nFaculty of ${student.faculty}'),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Department: ${student.department}'),
-                              Text('Class: ${student.terms.length % 2}')
-                            ],
+                          Expanded(
+                            flex: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Class: ${student.terms.length % 2}'),
+                                Text('ID : ${student.id}'),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -325,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: screenHeight * 0.07 +
                         (0.07 * student.terms[0].courses.length * screenHeight),
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -335,15 +405,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             [
                               Expanded(
                                   flex: 6,
-                                  child: Text('Ders Tanıtım Bilgisi')
+                                  child: Text('Course')
                               ),
                               Expanded(
                                   flex: 4,
                                   child: Text('Absenteeism'))
                             ],
                           ),
-                          ...List<Row>.generate(1, (index) {
-                            Course course = student.terms[0].courses[index];
+                          ...List<Row>.generate(student.terms[student.terms.length - 1].courses.length, (index) {
+                            Course course = student.terms[student.terms.length - 1].courses[index];
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -364,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       const Padding(padding: EdgeInsets.all(2)),
-                                      const Text('0/42'),
+                                      const Text('0/12'),
                                     ],
                                   ),
                                 ),
@@ -380,43 +450,42 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 }
-class CircularIndicatorWidget extends StatelessWidget {
+class CircularIndicatorWidget extends StatefulWidget {
   final int bigValue;
   final int smallValue;
   final String header;
+
 
   CircularIndicatorWidget({
     super.key,required this.bigValue, required this.smallValue, required this.header
   });
 
-  final List<Color> borderColors = [
-    const Color(0xFF74c7ec),
-    const Color(0xFFcba6f7),
-    const Color(0xFFeba0ac),
-    const Color(0xFFfab387),
-    const Color(0xFFe5c890),
-    const Color(0xFFa6d189),
-    const Color(0xFF99d1db),
-    const Color(0xFF8caaee),
-    const Color(0xFFbabbf1),
-  ];
+  @override
+  State<CircularIndicatorWidget> createState() => _CircularIndicatorWidgetState();
+}
 
+class _CircularIndicatorWidgetState extends State<CircularIndicatorWidget> {
+  late Color color1;
+  late Color color2;
+  @override
+  void initState() {
+    // TODO: implement initState
+    final random = Random();
+    color1 = borderColors[random.nextInt(borderColors.length)];
+    color2 = borderColors[random.nextInt(borderColors.length)];
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    final random = Random();
-    final color1 = borderColors[random.nextInt(borderColors.length)];
-    final color2 = borderColors[random.nextInt(borderColors.length)];
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            header,
+            widget.header,
             style: const TextStyle(
               fontSize: 12,
             ),
@@ -427,17 +496,17 @@ class CircularIndicatorWidget extends StatelessWidget {
           )),
           CircularPercentIndicator(
             radius: 60,
-            percent: (smallValue / bigValue),
+            percent: (widget.smallValue / widget.bigValue),
             backgroundColor: color1,
             progressColor: color2,
             lineWidth: 6,
-            center: Text('$smallValue of $bigValue'),
+            center: Text('${widget.smallValue} of ${widget.bigValue}'),
           ),
         ]);
   }
 }
 
-class OrangeBox extends StatelessWidget {
+class OrangeBox extends StatefulWidget {
   OrangeBox({
     super.key,
     required this.child,
@@ -449,37 +518,36 @@ class OrangeBox extends StatelessWidget {
   final double width;
   final double height;
 
-  final List<Color> borderColors = [
-    const Color(0xFF74c7ec),
-    const Color(0xFFcba6f7),
-    const Color(0xFFeba0ac),
-    const Color(0xFFfab387),
-    const Color(0xFFe5c890),
-    const Color(0xFFa6d189),
-    const Color(0xFF99d1db),
-    const Color(0xFF8caaee),
-    const Color(0xFFbabbf1),
-  ];
+  @override
+  State<OrangeBox> createState() => _OrangeBoxState();
+}
 
+class _OrangeBoxState extends State<OrangeBox> {
+  late Color color1;
+  @override
+  void initState() {
+    // TODO: implement initState
+    final random = Random();
+    color1 = borderColors[random.nextInt(borderColors.length)];
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    final random = Random();
-    final borderColor = borderColors[random.nextInt(borderColors.length)];
     return SizedBox(
-      width: width,
-      height: height,
+      width: widget.width,
+      height: widget.height,
       child: DecoratedBox(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(widget.height / 6),
               border: Border.all(
-                  color: borderColor,
+                  color: color1,
                   width: 3
               ),
               color: const Color(0xFF1e1e2e)
           ),
           child: Padding(
               padding: const EdgeInsets.all(4),
-              child: child
+              child: widget.child
           )
       ),
     );

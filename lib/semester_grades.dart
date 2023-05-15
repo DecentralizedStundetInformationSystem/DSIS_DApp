@@ -1,53 +1,92 @@
 ﻿import 'dart:math';
-
-import 'package:dsis_app/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dsis_app/contract_classes.dart';
+import 'home_screen.dart';
 
-class MyNewPage extends StatefulWidget {
-  const MyNewPage({Key? key}) : super(key: key);
+double _height = 50;
+int selectedTermIndex = 0;
+
+class SemesterGrades extends StatefulWidget {
+  const SemesterGrades({Key? key}) : super(key: key);
 
   @override
-  _MyNewPageState createState() => _MyNewPageState();
+  State<SemesterGrades> createState() => _SemesterGradesState();
 }
 
-EvaluationCriterion evaluationCriterion = EvaluationCriterion('quiz', 15, 90);
-EvaluationCriterion evaluationCriterion1 = EvaluationCriterion('lab', 15, 70);
-EvaluationCriterion evaluationCriterion2 =
-    EvaluationCriterion('midterm', 30, 92);
-EvaluationCriterion evaluationCriterion3 =
-    EvaluationCriterion('midterm', 40, 97);
-List<EvaluationCriterion> eval = [
-  evaluationCriterion,
-  evaluationCriterion1,
-  evaluationCriterion2,
-  evaluationCriterion3
-];
-Course course = Course('asd', 213, 'ad', 'asd', 7, 4, eval, '99', "AA");
-Course course1 = Course('qwe', 213, 'ad', 'asd', 7, 4, eval, '99', "XX");
-Course course2 = Course('zxcd', 213, 'ad', 'asd', 7, 4, eval, '99', "FF");
-List<Course> courses = [course, course1];
-double _height = courses.length * 75;
-
-class _MyNewPageState extends State<MyNewPage> {
-  String _selectedYear = '2021';
-  String _selectedSemester = 'Fall';
-
+class _SemesterGradesState extends State<SemesterGrades> {
+  late Color borderColor;
+  late double screenWidth;
+  late double screenHeight;
+  late Student student;
+  late String firstYear;
+  String yearValue = '2023';
+  String semesterValue = 'Fall';
+  
   void _onHeightChanged(double newHeight) {
     setState(() {
       _height = newHeight;
     });
   }
-
+  
+  
   @override
   Widget build(BuildContext context) {
-    final random = Random();
-    final borderColor = borderColors[random.nextInt(borderColors.length)];
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    student = ModalRoute.of(context)?.settings.arguments as Student;
+    firstYear = student.terms[selectedTermIndex].year.toString();
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    borderColor = Colors.transparent;
+    List<Term> dropTermsList = [];
+    for (int i = 0; i < student.terms.length; i += 2){
+      dropTermsList.add(student.terms[i]);
+    }
     return Scaffold(
         appBar: AppBar(
-          title: Text('My New Page'),
+          elevation: 1,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: Text(student.name),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
+        ),
+        drawer: Drawer(
+          width: screenWidth * 0.6,
+          backgroundColor: const Color(0xFF1e1e2e),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(screenHeight * 0.08),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                ),
+              ),
+              ListTile(
+                title: const Text('Home'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/home', arguments: {
+                    'tag': 'student',
+                    'data': student,
+                  },
+                  );
+                  _height = 50;
+                },
+              ),
+              ListTile(
+                title: const Text('Transcript'),
+                onTap: () {
+                  // Implement action for Item 2 here
+                },
+              ),
+            ],
+          ),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -70,20 +109,32 @@ class _MyNewPageState extends State<MyNewPage> {
                         underline: const SizedBox(
                           width: 0,
                         ),
-                        value: _selectedYear,
+                        value: yearValue,
                         onChanged: (String? newValue) {
                           setState(() {
-                            _selectedYear = newValue!;
+                            if(int.parse(newValue!) - int.parse(firstYear) == 0){
+                              selectedTermIndex = 0;
+                            }
+                            else if (int.parse(newValue) - int.parse(firstYear) == 1){
+                              selectedTermIndex = 2;
+                            }
+                            else if (int.parse(newValue) - int.parse(firstYear) == 2){
+                              selectedTermIndex = 4;
+                            }
+                            else if (int.parse(newValue) - int.parse(firstYear) == 3){
+                              selectedTermIndex = 6;
+                            }
+                            yearValue = newValue;
                           });
                         },
-                        items: <String>['2020', '2021', '2022', '2023']
-                            .map<DropdownMenuItem<String>>((String value) {
+                        items: dropTermsList
+                            .map<DropdownMenuItem<String>>((Term term) {
                           return DropdownMenuItem<String>(
-                            value: value,
+                            value: term.year.toString(),
                             child: Center(
                               child: SizedBox(
                                   width: screenWidth * 0.30,
-                                  child: Text(value)),
+                                  child: Text(term.year.toString())),
                             ),
                           );
                         }).toList(),
@@ -105,13 +156,21 @@ class _MyNewPageState extends State<MyNewPage> {
                         underline: const SizedBox(
                           width: 0,
                         ),
-                        value: _selectedSemester,
+                        value: semesterValue,
                         onChanged: (String? newValue) {
                           setState(() {
-                            _selectedSemester = newValue!;
+                            if(newValue == 'Fall'){
+                              selectedTermIndex -= 1;
+                            }
+                            else if (newValue == 'Spring'){
+                              if (student.terms.length - selectedTermIndex >= 2){
+                                selectedTermIndex += 1;
+                              }
+                            }
+                            semesterValue = newValue!;
                           });
                         },
-                        items: <String>['Fall', 'Spring', 'Summer', 'Winter']
+                        items: <String>['Fall', 'Spring']
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -128,11 +187,11 @@ class _MyNewPageState extends State<MyNewPage> {
               AnimatedContainer(
                 duration: const Duration(microseconds: 200),
                 width: screenWidth,
-                height: _height,
+                height: _height + student.terms[selectedTermIndex].courses.length * screenHeight * 0.07,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                       borderRadius:
-                          BorderRadius.circular(courses.length * 75 / 6),
+                      BorderRadius.circular(student.terms[selectedTermIndex].courses.length * 75 / 6),
                       border: Border.all(color: borderColor, width: 3),
                       color: const Color(0xFF1e1e2e)),
                   child: Padding(
@@ -146,13 +205,15 @@ class _MyNewPageState extends State<MyNewPage> {
                             Expanded(flex: 3, child: Text('')),
                           ],
                         ),
+                        SizedBox(height: screenHeight * 0.02),
+                        if (student.terms.length > selectedTermIndex)
                         Flexible(
                           child: ListView.builder(
                             physics: NeverScrollableScrollPhysics(),
-                            itemCount: courses.length,
+                            itemCount: student.terms[selectedTermIndex].courses.length,
                             itemBuilder: (context, index) => CourseDetails(
                                 onHeightChanged: _onHeightChanged,
-                                course: courses[index]),
+                                course: student.terms[selectedTermIndex].courses[index], courses: student.terms[selectedTermIndex].courses,),
                           ),
                         ),
                       ],
@@ -165,13 +226,13 @@ class _MyNewPageState extends State<MyNewPage> {
         ));
   }
 }
-
 class CourseDetails extends StatefulWidget {
   final Course course;
+  final List<Course> courses;
   final Function(double) onHeightChanged;
 
   CourseDetails(
-      {super.key, required this.course, required this.onHeightChanged});
+      {super.key, required this.course, required this.onHeightChanged, required this.courses});
 
   @override
   _CourseDetailsState createState() => _CourseDetailsState();
@@ -184,8 +245,8 @@ class _CourseDetailsState extends State<CourseDetails> {
     setState(() {
       _expanded = !_expanded;
       _height = _expanded
-          ? _height += 275
-          : _height -= 275; // Set the desired height here
+          ? _height += 250
+          : _height -= 250; // Set the desired height here
     });
     widget.onHeightChanged(_height);
   }
@@ -217,7 +278,7 @@ class _CourseDetailsState extends State<CourseDetails> {
         ),
         DecoratedBox(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(courses.length * 75 / 12),
+              borderRadius: BorderRadius.circular(widget.courses.length * 75 / 12),
               border: Border.all(color: borderColor, width: 3),
               color: const Color(0xFF313244)),
           child: Column(
@@ -241,48 +302,48 @@ class _CourseDetailsState extends State<CourseDetails> {
         SizedBox(height: 20),
         DecoratedBox(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(courses.length * 75 / 12),
+              borderRadius: BorderRadius.circular(widget.courses.length * 75 / 12),
               border: Border.all(color: borderColor, width: 3),
               color: const Color(0xFF313244)),
           child: Column(
             children: [
               if (_expanded)
                 Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Course Code'),
-                        Text(widget.course.code),
-                      ],
-                    ),
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Course Code'),
+                      Text(widget.course.code),
+                    ],
                   ),
+                ),
               if (_expanded)
                 Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Credit'),
-                    Text(widget.course.credit.toString()),
-                  ],
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Credit'),
+                      Text(widget.course.credit.toString()),
+                    ],
+                  ),
                 ),
-              ),
               if (_expanded)
-                 Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Instructor'),
-                    Text(widget.course.code),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Instructor'),
+                      Text(widget.course.instructor),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
-        
+
       ],
     );
   }
