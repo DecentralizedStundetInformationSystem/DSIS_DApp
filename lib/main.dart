@@ -1,5 +1,6 @@
 import 'package:dsis_app/design_screen.dart';
 import 'package:dsis_app/sign_up_screen.dart';
+import 'package:dsis_app/transcript_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:dsis_app/log_in_screen.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpScreen(),
         '/home': (context) => HomeScreen(),
         '/semester': (context) => SemesterGrades(),
+        '/transcript': (context) => TranscriptScreen(),
         '/design': (context) => MyNewPage(),
       },
       theme: ThemeData(
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
           displayLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           displayMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           bodyLarge: TextStyle(fontSize: 16),
-          bodyMedium: TextStyle(fontSize: 14),
+          bodyMedium: TextStyle(fontSize: 13),
           bodySmall: TextStyle(fontSize: 12),
         ),
         scaffoldBackgroundColor: const Color(0xFF11111b),

@@ -29,76 +29,78 @@ class _SignUpScreenState extends State<SignUpScreen> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Stack(
-        children: [
-          Form(
-          key: formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (input) =>
-                      input!.isEmpty ? 'Please enter your school email' : null,
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: idController,
-                  decoration: const InputDecoration(labelText: 'ID'),
-                  validator: (input) =>
-                      input!.isEmpty ? 'Please enter your school ID' : null,
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: facultyController,
-                  decoration: const InputDecoration(labelText: 'Faculty'),
-                  validator: (input) =>
-                      input!.isEmpty ? 'Please enter your faculty' : null,
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: departmentController,
-                  decoration: const InputDecoration(labelText: 'Department'),
-                  validator: (input) =>
-                      input!.isEmpty ? 'Please enter your department' : null,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await signUp(context);
-                    showPasswordDialog(context);
-                  },
-                  child: const Text('Sign up'),
-                ),
-              ],
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Form(
+            key: formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    validator: (input) =>
+                        input!.isEmpty ? 'Please enter your school email' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: idController,
+                    decoration: const InputDecoration(labelText: 'ID'),
+                    validator: (input) =>
+                        input!.isEmpty ? 'Please enter your school ID' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: facultyController,
+                    decoration: const InputDecoration(labelText: 'Faculty'),
+                    validator: (input) =>
+                        input!.isEmpty ? 'Please enter your faculty' : null,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: departmentController,
+                    decoration: const InputDecoration(labelText: 'Department'),
+                    validator: (input) =>
+                        input!.isEmpty ? 'Please enter your department' : null,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await signUp(context);
+                      showPasswordDialog(context);
+                    },
+                    child: const Text('Sign up'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-          if (_isLoading)
-            const Opacity(
-              opacity: 0.5,
-              child: ModalBarrier(
-                dismissible: false,
-                color: Colors.black,
-              ),
-            ),
-          if (_isLoading)
-            Center(
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
-                child: CircularProgressIndicator(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  strokeWidth: 6,
+            if (_isLoading)
+              const Opacity(
+                opacity: 0.5,
+                child: ModalBarrier(
+                  dismissible: false,
+                  color: Colors.black,
                 ),
               ),
-            ),
-        ]
+            if (_isLoading)
+              Center(
+                child: SizedBox(
+                  width: 100.0,
+                  height: 100.0,
+                  child: CircularProgressIndicator(
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    strokeWidth: 6,
+                  ),
+                ),
+              ),
+          ]
+        ),
       ),
     );
   }

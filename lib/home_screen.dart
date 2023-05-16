@@ -32,6 +32,10 @@ final List<Color> borderColors = [
 ];
 bool _isLoading = true;
 
+String capitalize(String str){
+  return '${str.split(' ')[0][0].toUpperCase()}${str.split(' ')[0].substring(1)} ${str.split(' ')[1][0].toUpperCase()}${str.split(' ')[1].substring(1)}';
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   late User user;
   late String contractAddress;
@@ -39,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late Client httpClient;
   late String projectURL;
   late Student student;
+  
+  
 
   Future<String> getContractAddress(String userEmail) async {
     String contractAddress = '';
@@ -74,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
         // Do something with student object
       }
     }
-    print('started the init student method');
     httpClient = Client();
     ethClient = Web3Client(projectURL, httpClient);
     var contractAddress = await getContractAddress(user.email!);
@@ -83,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
     String termFile = await rootBundle.loadString("assets/contracts/term.json");
     String courseFile = await rootBundle.loadString(
         "assets/contracts/course.json");
-    print('got contract');
     var contract = DeployedContract(
         ContractAbi.fromJson(studentFile, 'Student'),
         EthereumAddress.fromHex(contractAddress));
@@ -118,117 +122,111 @@ class _HomeScreenState extends State<HomeScreen> {
       params: [],
     );
     List<Term> termList = [];
-    print(result);
     List<String> arr =
     result[0].toString().replaceAll('[', '').replaceAll(']', '').replaceAll(' ', '').split(',');
-    print(arr);
-    for (int i = 0; i < arr.length; i++) {
-      print(arr[i]);
-      print('creating term');
-      var termContract = DeployedContract(
-          ContractAbi.fromJson(termFile, 'Term'),
-          EthereumAddress.fromHex(
-              arr[i].toString().replaceAll('[', '').replaceAll(']', '')));
-      var termYear = await ethClient.call(
-          contract: termContract,
-          function: termContract.function('year'),
-          params: []);
-      var termSeason = await ethClient.call(
-          contract: termContract,
-          function: termContract.function('season'),
-          params: []);
-      var termCourses = await ethClient.call(
-          contract: termContract,
-          function: termContract.function('getCourses'),
-          params: []);
-      List<String> termCourseList = termCourses[0]
-          .toString()
-          .replaceAll('[', '')
-          .replaceAll(']', '')
-          .split(',');
-      List<Course> courses = [];
-      print('got course');
-      print(termCourseList.length);
-      print(termCourseList);
-      if(termCourseList[0].toString() != ''){
-        for (int i = 0; i < termCourseList.length; i++) {
-          var courseContract = DeployedContract(
-              ContractAbi.fromJson(courseFile, 'Course'),
-              EthereumAddress.fromHex(
-                  termCourseList[i].toString().replaceAll(' ', '')));
-          var courseName = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('name'),
-              params: []);
-          var courseID = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('courseID'),
-              params: []);
-          var courseCode = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('courseCode'),
-              params: []);
-          var courseInstructor = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('instructor'),
-              params: []);
-          var courseCredit = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('credit'),
-              params: []);
-          var courseOverallGrade = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('overallGrade'),
-              params: []);
-          var courseLetterGrade = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('letterGrade'),
-              params: []);
-          var courseEvalCount = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('evaluationCount'),
-              params: []);
-          var courseResultContents = await ethClient.call(
-              contract: courseContract,
-              function: courseContract.function('getEvaluationCriteria'),
-              params: []);
-          var courseResult = courseResultContents[0];
-          List<EvaluationCriterion> evaluationCriteria = [];
-          for (int i = 0; i < int.parse(courseEvalCount[0].toString()); i++) {
-            EvaluationCriterion evaluationCriterion = EvaluationCriterion(
-                courseResult[i][0].toString(),
-                int.parse(courseResult[i][1].toString()),
-                int.parse(courseResult[i][2].toString()));
-            evaluationCriteria.add(evaluationCriterion);
+    if(arr[0].toString() != '') {
+      for (int i = 0; i < arr.length; i++) {
+        var termContract = DeployedContract(
+            ContractAbi.fromJson(termFile, 'Term'),
+            EthereumAddress.fromHex(
+                arr[i].toString().replaceAll('[', '').replaceAll(']', '')));
+        var termYear = await ethClient.call(
+            contract: termContract,
+            function: termContract.function('year'),
+            params: []);
+        var termSeason = await ethClient.call(
+            contract: termContract,
+            function: termContract.function('season'),
+            params: []);
+        var termCourses = await ethClient.call(
+            contract: termContract,
+            function: termContract.function('getCourses'),
+            params: []);
+        List<String> termCourseList = termCourses[0]
+            .toString()
+            .replaceAll('[', '')
+            .replaceAll(']', '')
+            .split(',');
+        List<Course> courses = [];
+        if (termCourseList[0].toString() != '') {
+          for (int i = 0; i < termCourseList.length; i++) {
+            var courseContract = DeployedContract(
+                ContractAbi.fromJson(courseFile, 'Course'),
+                EthereumAddress.fromHex(
+                    termCourseList[i].toString().replaceAll(' ', '')));
+            var courseName = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('name'),
+                params: []);
+            var courseID = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('courseID'),
+                params: []);
+            var courseCode = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('courseCode'),
+                params: []);
+            var courseInstructor = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('instructor'),
+                params: []);
+            var courseCredit = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('credit'),
+                params: []);
+            var courseOverallGrade = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('overallGrade'),
+                params: []);
+            var courseLetterGrade = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('letterGrade'),
+                params: []);
+            var courseEvalCount = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('evaluationCount'),
+                params: []);
+            var courseResultContents = await ethClient.call(
+                contract: courseContract,
+                function: courseContract.function('getEvaluationCriteria'),
+                params: []);
+            var courseResult = courseResultContents[0];
+            List<EvaluationCriterion> evaluationCriteria = [];
+            for (int i = 0; i < int.parse(courseEvalCount[0].toString()); i++) {
+              EvaluationCriterion evaluationCriterion = EvaluationCriterion(
+                  courseResult[i][0].toString(),
+                  int.parse(courseResult[i][1].toString()),
+                  int.parse(courseResult[i][2].toString()));
+              evaluationCriteria.add(evaluationCriterion);
+            }
+            BigInt courseIDValue = BigInt.parse(courseID[0].toString());
+            BigInt courseCreditValue = BigInt.parse(courseCredit[0].toString());
+            BigInt courseEvalValue = BigInt.parse(
+                courseEvalCount[0].toString());
+            Course course = Course(
+                courseName[0].toString(),
+                courseIDValue.toInt(),
+                courseCode[0].toString(),
+                courseInstructor[0].toString(),
+                courseCreditValue.toInt(),
+                courseEvalValue.toInt(),
+                evaluationCriteria,
+                courseOverallGrade[0].toString(),
+                courseLetterGrade[0].toString());
+            courses.add(course);
           }
-          BigInt courseIDValue = BigInt.parse(courseID[0].toString());
-          BigInt courseCreditValue = BigInt.parse(courseCredit[0].toString());
-          BigInt courseEvalValue = BigInt.parse(courseEvalCount[0].toString());
-          Course course = Course(
-              courseName[0].toString(),
-              courseIDValue.toInt(),
-              courseCode[0].toString(),
-              courseInstructor[0].toString(),
-              courseCreditValue.toInt(),
-              courseEvalValue.toInt(),
-              evaluationCriteria,
-              courseOverallGrade[0].toString(),
-              courseLetterGrade[0].toString());
-          courses.add(course);
         }
+        BigInt termYearValue = BigInt.parse(termYear[0].toString());
+        Term term = Term(
+            termYearValue.toInt(), termSeason[0].toString(), courses);
+        termList.add(term);
       }
-      BigInt termYearValue = BigInt.parse(termYear[0].toString());
-      Term term = Term(
-          termYearValue.toInt(), termSeason[0].toString(), courses);
-      termList.add(term);
     }
     BigInt studentIDValue = BigInt.parse(id[0].toString());
     BigInt studentRegYearValue = BigInt.parse(regYear[0].toString());
     student = Student(
         name[0].toString(), studentIDValue.toInt(), faculty[0].toString(),
         department[0].toString(), studentRegYearValue.toInt(), termList);
-    print('stundet object created, returning');
-    print(student.terms.length);
     setState(() {
       _isLoading = false;
     });
@@ -242,15 +240,23 @@ class _HomeScreenState extends State<HomeScreen> {
     initStudent().then((initializedStudent) {
       setState(() {
         student = initializedStudent;
+        for(int i = 0; i < student.terms.length; i++){
+          for(int j = 0; i < student.terms[i].courses.length; j++){
+            courseLoad++;
+            creditLoad += student.terms[i].courses[j].credit;
+          }
+        }
         _isLoading = false;
       });
     }).catchError((error) {
       setState(() {
         _isLoading = false;
       });
-      print('Error initializing student: $error');
     });
   }
+
+  int courseLoad = 0;
+  int creditLoad = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         elevation: 1,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        title: _isLoading ? const Text('') : Text(student.name),
+        title: _isLoading ? const Text('') : Align(
+          alignment: Alignment.topRight,
+            child: Text(capitalize(student.name))),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -294,19 +302,27 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               title: const Text('Semester Grades'),
               onTap: () {
-                Navigator.push(
+                Navigator.pushNamed(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => SemesterGrades(),
-                    settings: RouteSettings(arguments: student),
-                  ),
+                  '/semester',
+                  arguments: {
+                    'tag': 'student',
+                    'data': student,
+                  },
                 );
               },
             ),
             ListTile(
               title: const Text('Transcript'),
               onTap: () {
-                // Implement action for Item 2 here
+                Navigator.pushNamed(
+                  context,
+                  '/transcript',
+                  arguments: {
+                    'tag': 'student',
+                    'data': student,
+                  },
+                );
               },
             ),
           ],
@@ -332,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   OrangeBox(
                     width: screenWidth * 1,
-                    height: screenHeight * 0.2,
+                    height: screenHeight * 0.15,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(
@@ -340,24 +356,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            flex: 6,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Department:\n${student.department}'),
-                                Text('Faculty:\nFaculty of ${student.faculty}'),
-                              ],
-                            ),
-                          ),
-                          Expanded(
                             flex: 4,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Class: ${student.terms.length % 2}'),
-                                Text('ID : ${student.id}'),
+                                Text('ID : ${student.id}',
+                                  style: const TextStyle(
+                                      fontSize: 13
+                                  ),),
+                                Text('Class : ${(student.terms.length / 2 + 1).toInt()}',
+                                  style: const TextStyle(
+                                      fontSize: 13
+                                  ),),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 6,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Faculty : Faculty of ${student.faculty}',
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                    overflow: TextOverflow.ellipsis
+                                  ),
+                                ),
+                                Text('Department : ${student.department}',
+                                  style: const TextStyle(
+                                      fontSize: 13
+                                  ),),
                               ],
                             ),
                           ),
@@ -374,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: screenWidth * 0.46,
                         child: CircularIndicatorWidget(
                           bigValue: 46,
-                          smallValue: 23,
+                          smallValue: courseLoad,
                           header: 'Your Course Load',
                         ),
                       ),
@@ -383,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: screenWidth * 0.46,
                         child: CircularIndicatorWidget(
                           bigValue: 240,
-                          smallValue: 72,
+                          smallValue: creditLoad,
                           header: 'Your ECTS Load',
                         ),
                       ),
@@ -392,8 +422,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: screenHeight * 0.02),
                   OrangeBox(
                     width: screenWidth,
-                    height: screenHeight * 0.07 +
-                        (0.07 * student.terms[0].courses.length * screenHeight),
+                    height: student.terms.isNotEmpty ? screenHeight * 0.07 +
+                        (0.07 * student.terms[0].courses.length * screenHeight): 100,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
@@ -412,6 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Text('Absenteeism'))
                             ],
                           ),
+                          if(student.terms.isNotEmpty)
                           ...List<Row>.generate(student.terms[student.terms.length - 1].courses.length, (index) {
                             Course course = student.terms[student.terms.length - 1].courses[index];
                             return Row(
@@ -459,7 +490,7 @@ class CircularIndicatorWidget extends StatefulWidget {
   final String header;
 
 
-  CircularIndicatorWidget({
+  const CircularIndicatorWidget({
     super.key,required this.bigValue, required this.smallValue, required this.header
   });
 
@@ -507,7 +538,7 @@ class _CircularIndicatorWidgetState extends State<CircularIndicatorWidget> {
 }
 
 class OrangeBox extends StatefulWidget {
-  OrangeBox({
+  const OrangeBox({
     super.key,
     required this.child,
     required this.width,
