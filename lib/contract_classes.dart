@@ -1,8 +1,4 @@
-﻿import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:web3dart/web3dart.dart';
-
-class Term {
+﻿class Term {
   int year;
   String season;
   List<Course> courses;
@@ -16,7 +12,6 @@ class EvaluationCriterion {
   int grade;
 
   EvaluationCriterion(this.name, this.weight, this.grade);
-  
 }
 
 class Course {
@@ -24,6 +19,7 @@ class Course {
   int id;
   String code;
   String instructor;
+  int attendance;
   int credit;
   int evalCount;
   List<EvaluationCriterion> evaluationCriteria;
@@ -31,16 +27,17 @@ class Course {
   String letterGrade;
 
   Course(
-      this.name,
-      this.id,
-      this.code,
-      this.instructor,
-      this.credit,
-      this.evalCount,
-      this.evaluationCriteria,
-      this.overallGrade,
-      this.letterGrade,
-      );
+    this.name,
+    this.id,
+    this.code,
+    this.instructor,
+    this.attendance,
+    this.credit,
+    this.evalCount,
+    this.evaluationCriteria,
+    this.overallGrade,
+    this.letterGrade,
+  );
 }
 
 class Student {
@@ -51,7 +48,8 @@ class Student {
   int id;
   List<Term> terms = [];
 
-  Student(this.name, this.id, this.faculty, this.department, this.regYear, this.terms);
+  Student(this.name, this.id, this.faculty, this.department, this.regYear,
+      this.terms);
 
   String getName() => name;
 
@@ -64,7 +62,4 @@ class Student {
   int getID() => id;
 
   List<Term> getTerms() => terms;
-  
 }
-
-

@@ -21,37 +21,41 @@ class _SemesterGradesState extends State<SemesterGrades> {
   late String firstYear;
   String yearValue = '2023';
   String semesterValue = 'Fall';
-  
+
+  @override
+  void initState() {
+    final random = Random();
+    borderColor = borderColors[random.nextInt(borderColors.length)];
+    super.initState();
+  }
+
   void _onHeightChanged(double newHeight) {
     setState(() {
       _height = newHeight;
     });
   }
-  
-  
+
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? args =
-    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null) {
       if (args['tag'] == 'student') {
-        // Student object was passed
         student = args['data'] as Student;
-        // Do something with student object
       }
     }
-    firstYear = student.terms.isNotEmpty ? student.terms[0].year.toString() : "";
+    firstYear =
+        student.terms.isNotEmpty ? student.terms[0].year.toString() : "";
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
-    borderColor = Colors.transparent;
     List<Term> dropTermsList = [];
-    for (int i = 0; i < student.terms.length; i += 2){
+    for (int i = 0; i < student.terms.length; i += 2) {
       dropTermsList.add(student.terms[i]);
     }
     return Scaffold(
         appBar: AppBar(
-          elevation: 1,
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: Align(
               alignment: Alignment.topRight,
               child: Text(capitalize(student.name))),
@@ -81,21 +85,28 @@ class _SemesterGradesState extends State<SemesterGrades> {
               ListTile(
                 title: const Text('Home'),
                 onTap: () {
-                  Navigator.pushNamed(context, '/home', arguments: {
-                    'tag': 'student',
-                    'data': student,
-                  },
+                  Navigator.pushNamed(
+                    context,
+                    '/home',
+                    arguments: {
+                      'tag': 'student',
+                      'data': student,
+                    },
                   );
                   _height = 50;
+                  selectedTermIndex = 0;
                 },
               ),
               ListTile(
                 title: const Text('Transcript'),
                 onTap: () {
-                  Navigator.pushNamed(context, '/transcript', arguments: {
-                    'tag': 'student',
-                    'data': student,
-                  },
+                  Navigator.pushNamed(
+                    context,
+                    '/transcript',
+                    arguments: {
+                      'tag': 'student',
+                      'data': student,
+                    },
                   );
                 },
               ),
@@ -104,7 +115,7 @@ class _SemesterGradesState extends State<SemesterGrades> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 6),
             child: Column(children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -125,23 +136,27 @@ class _SemesterGradesState extends State<SemesterGrades> {
                         ),
                         value: yearValue,
                         onChanged: (String? newValue) {
-                          if(newValue == yearValue) {
+                          if (newValue == yearValue) {
                             return;
                           }
                           setState(() {
-                            if(int.parse(newValue!) - int.parse(firstYear) == 0){
+                            if (int.parse(newValue!) - int.parse(firstYear) ==
+                                0) {
                               selectedTermIndex = 0;
                               semesterValue = 'Fall';
-                            }
-                            else if (int.parse(newValue) - int.parse(firstYear) == 1){
+                            } else if (int.parse(newValue) -
+                                    int.parse(firstYear) ==
+                                1) {
                               selectedTermIndex = 2;
                               semesterValue = 'Fall';
-                            }
-                            else if (int.parse(newValue) - int.parse(firstYear) == 2){
+                            } else if (int.parse(newValue) -
+                                    int.parse(firstYear) ==
+                                2) {
                               selectedTermIndex = 4;
                               semesterValue = 'Fall';
-                            }
-                            else if (int.parse(newValue) - int.parse(firstYear) == 3){
+                            } else if (int.parse(newValue) -
+                                    int.parse(firstYear) ==
+                                3) {
                               selectedTermIndex = 6;
                               semesterValue = 'Fall';
                             }
@@ -179,32 +194,28 @@ class _SemesterGradesState extends State<SemesterGrades> {
                         ),
                         value: semesterValue,
                         onChanged: (String? newValue) {
-                          if(newValue == semesterValue) {
-                            print("came true");
+                          if (newValue == semesterValue) {
                             return;
-                          }
-                          else {
+                          } else {
                             setState(() {
                               if (newValue == 'Fall') {
                                 selectedTermIndex -= 1;
                                 semesterValue = newValue!;
-                              }
-                              else if (newValue == 'Spring') {
+                              } else if (newValue == 'Spring') {
                                 if (student.terms.length - selectedTermIndex >=
                                     2) {
                                   selectedTermIndex += 1;
                                   semesterValue = newValue!;
-                                }
-                                else{
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                       SnackBar(
-                                        behavior: SnackBarBehavior.floating,
-                                        content: const Text('Invalid Term'),
-                                        backgroundColor: Theme.of(context).colorScheme.error,
-                                        elevation: 10,
-                                        width: 240,
-                                      )
-                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: const Text('Invalid Term'),
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.error,
+                                    elevation: 10,
+                                    width: 240,
+                                  ));
                                 }
                               }
                             });
@@ -227,16 +238,26 @@ class _SemesterGradesState extends State<SemesterGrades> {
               AnimatedContainer(
                 duration: const Duration(microseconds: 200),
                 width: screenWidth,
-                height: student.terms.isNotEmpty ? _height + student.terms[selectedTermIndex].courses.length * screenHeight * 0.09 : 100,
+                height: student.terms.isNotEmpty
+                    ? _height +
+                        student.terms[selectedTermIndex].courses.length *
+                            screenHeight *
+                            0.1
+                    : 100,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                      borderRadius:
-                      BorderRadius.circular(student.terms.isNotEmpty ? (student.terms[selectedTermIndex].courses.length * 75 / 6) : 12),
+                      borderRadius: BorderRadius.circular(student
+                              .terms.isNotEmpty
+                          ? (student.terms[selectedTermIndex].courses.length *
+                              75 /
+                              12)
+                          : 12),
                       border: Border.all(color: borderColor, width: 3),
                       color: const Color(0xFF1e1e2e)),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         const Row(
                           children: [
@@ -247,15 +268,20 @@ class _SemesterGradesState extends State<SemesterGrades> {
                         ),
                         SizedBox(height: screenHeight * 0.02),
                         if (student.terms.length > selectedTermIndex)
-                        Flexible(
-                          child: ListView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: student.terms[selectedTermIndex].courses.length,
-                            itemBuilder: (context, index) => CourseDetails(
+                          Flexible(
+                            child: ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: student
+                                  .terms[selectedTermIndex].courses.length,
+                              itemBuilder: (context, index) => CourseDetails(
                                 onHeightChanged: _onHeightChanged,
-                                course: student.terms[selectedTermIndex].courses[index], courses: student.terms[selectedTermIndex].courses,),
+                                course: student
+                                    .terms[selectedTermIndex].courses[index],
+                                courses:
+                                    student.terms[selectedTermIndex].courses,
+                              ),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -266,27 +292,31 @@ class _SemesterGradesState extends State<SemesterGrades> {
         ));
   }
 }
+
 class CourseDetails extends StatefulWidget {
   final Course course;
   final List<Course> courses;
   final Function(double) onHeightChanged;
 
-  CourseDetails(
-      {super.key, required this.course, required this.onHeightChanged, required this.courses});
+  const CourseDetails(
+      {super.key,
+      required this.course,
+      required this.onHeightChanged,
+      required this.courses});
 
   @override
-  _CourseDetailsState createState() => _CourseDetailsState();
+  CourseDetailsState createState() => CourseDetailsState();
 }
 
-class _CourseDetailsState extends State<CourseDetails> {
+class CourseDetailsState extends State<CourseDetails> {
   bool _expanded = false;
 
   void _toggleExpanded() {
     setState(() {
       _expanded = !_expanded;
       _height = _expanded
-          ? _height += 250
-          : _height -= 250; // Set the desired height here
+          ? _height += 240
+          : _height -= 240; // Set the desired height here
     });
     widget.onHeightChanged(_height);
   }
@@ -318,20 +348,23 @@ class _CourseDetailsState extends State<CourseDetails> {
         ),
         DecoratedBox(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.courses.length * 75 / 12),
+              borderRadius:
+                  BorderRadius.circular(widget.courses.length * 75 / 24),
               border: Border.all(color: borderColor, width: 3),
               color: const Color(0xFF313244)),
           child: Column(
             children: [
               if (_expanded)
                 ...widget.course.evaluationCriteria.map(
-                      (entry) => Padding(
+                  (entry) => Padding(
                     padding: const EdgeInsets.all(8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(entry.name),
-                        entry.grade == 101 ? const Text('') : Text(entry.grade.toString()),
+                        entry.grade == 101
+                            ? const Text('')
+                            : Text(entry.grade.toString()),
                       ],
                     ),
                   ),
@@ -342,7 +375,8 @@ class _CourseDetailsState extends State<CourseDetails> {
         const SizedBox(height: 20),
         DecoratedBox(
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.courses.length * 75 / 12),
+              borderRadius:
+                  BorderRadius.circular(widget.courses.length * 75 / 24),
               border: Border.all(color: borderColor, width: 3),
               color: const Color(0xFF313244)),
           child: Column(
@@ -383,7 +417,6 @@ class _CourseDetailsState extends State<CourseDetails> {
             ],
           ),
         ),
-
       ],
     );
   }

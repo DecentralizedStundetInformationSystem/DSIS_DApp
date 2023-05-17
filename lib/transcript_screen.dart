@@ -29,9 +29,9 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   double termTotalPoints = 0;
   int globalTotalCredit = 0;
   double globalTotalPoints = 0;
-  List<double> totalDNO = [];
+  List<double> termAvgArray = [];
 
-  String calculateGPA(Term term) {
+  String calculateTermAvg(Term term) {
     double totalPoints = 0;
     int totalCredit = 0;
     int courseCount = term.courses.length;
@@ -45,22 +45,29 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
         totalPoints += coursePoint;
       }
     }
-    double DNO = totalPoints / totalCredit;
+    double dno = totalPoints / totalCredit;
     termTotalCredit = totalCredit;
     globalTotalCredit += totalCredit;
     termTotalPoints = totalPoints;
     globalTotalPoints += totalPoints;
-    double sum = 0;
-    for (int i = 0; i < totalDNO.length; i++){
-      sum += totalDNO[i];
-    }
-    totalDNO.add(DNO + sum);
-    return DNO.toString();
+    termAvgArray.add(dno);
+    return dno.toStringAsFixed(2);
   }
 
+  double sum = 0;
+
+  String calculateGPA(int index) {
+    for (int i = 0; i < index + 1; i++) {
+      sum += termAvgArray[i];
+    }
+    sum = sum / (index + 1);
+    return sum.toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) {
+    globalTotalCredit = 0;
+    globalTotalPoints = 0;
     final Map<String, dynamic>? args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null) {
@@ -75,8 +82,8 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         appBar: AppBar(
-          elevation: 1,
-          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: Align(
               alignment: Alignment.topRight,
               child: Text(capitalize(student.name))),
@@ -145,9 +152,12 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                     width: screenWidth,
                     child: DecoratedBox(
                       decoration: BoxDecoration(color: borderColor),
-                      child: Text(
-                        '${term.year} - ${term.season}',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Text(
+                          '${term.year} - ${term.season}',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
                     ),
                   ),
@@ -212,6 +222,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                       ...term.courses.map((course) {
                         termTotalPoints = 0;
                         termTotalCredit = 0;
+                        sum = 0;
                         return TableRow(
                           children: [
                             TableCell(
@@ -265,15 +276,14 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                                   padding: const EdgeInsets.all(2.0),
                                   child: SizedBox(
                                       height: screenHeight * 0.06,
-                                      child: Text(calculateGPA(term) == '0.0'
-                                          ? ''
-                                          : calculateGPA(term))))),
+                                      child: Text(calculateTermAvg(term))))),
                           TableCell(
                               child: Padding(
                                   padding: const EdgeInsets.all(2.0),
                                   child: SizedBox(
                                       height: screenHeight * 0.06,
-                                      child: Text(termTotalCredit.toString())))),
+                                      child:
+                                          Text(termTotalCredit.toString())))),
                           TableCell(
                               child: Padding(
                                   padding: const EdgeInsets.all(2.0),
@@ -285,7 +295,8 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                                   padding: const EdgeInsets.all(2.0),
                                   child: SizedBox(
                                       height: screenHeight * 0.06,
-                                      child: Text(termTotalPoints.toString())))),
+                                      child:
+                                          Text(termTotalPoints.toString())))),
                         ],
                       ),
                       TableRow(
@@ -293,12 +304,11 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                           TableCell(
                               child: SizedBox(
                                   height: screenHeight * 0.06,
-                                  child: Text('GPA'))),
+                                  child: const Text('GPA'))),
                           TableCell(
                               child: SizedBox(
                                   height: screenHeight * 0.06,
-                                  child: Text((totalDNO[index] / index).toString()))
-                          ),
+                                  child: Text(calculateGPA(index)))),
                           TableCell(
                               child: SizedBox(
                                   height: screenHeight * 0.06,
@@ -306,7 +316,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                           TableCell(
                               child: SizedBox(
                                   height: screenHeight * 0.06,
-                                  child: Text('Grand Total'))),
+                                  child: const Text('Grand Total'))),
                           TableCell(
                               child: SizedBox(
                                   height: screenHeight * 0.06,
@@ -322,4 +332,3 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
         ));
   }
 }
-

@@ -1,7 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dsis_app/design_screen.dart';
-import 'package:dsis_app/sign_up_screen.dart';
-import 'package:dsis_app/home_screen.dart';
+﻿import 'package:dsis_app/sign_up_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -21,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Stack(children: [
       Scaffold(
         body: Center(
@@ -46,18 +44,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: <Widget>[
                         TextFormField(
                           validator: (input) =>
-                          input!.isEmpty ? 'Please enter your email' : null,
+                              input!.isEmpty ? 'Please enter your email' : null,
                           onSaved: (input) => email = input!,
                           decoration: const InputDecoration(
                             labelText: 'Email',
                           ),
                         ),
                         const Padding(
-                            padding:
-                            EdgeInsets.symmetric(horizontal: 0, vertical: 6)),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 0, vertical: 6)),
                         TextFormField(
-                          validator: (input) =>
-                          input!.isEmpty
+                          validator: (input) => input!.isEmpty
                               ? 'Please enter your password'
                               : null,
                           onSaved: (input) => password = input!,
@@ -74,11 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
-                      Theme
-                          .of(context)
-                          .colorScheme
-                          .primaryContainer,
-                      fixedSize: const Size(200, 60),
+                          Theme.of(context).colorScheme.primaryContainer,
+                      fixedSize: Size(screenWidth * 0.5, screenWidth * 0.13),
                     ),
                     onPressed: () {
                       signIn();
@@ -90,11 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
-                      Theme
-                          .of(context)
-                          .colorScheme
-                          .secondaryContainer,
-                      fixedSize: const Size(200, 30)),
+                          Theme.of(context).colorScheme.secondaryContainer,
+                      fixedSize: Size(screenWidth * 0.5, screenWidth * 0.1)),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -107,12 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(
-                          context, "/design", arguments: {});
-                    }, 
-                    child: Text('design')),
               ],
             ),
           ),
@@ -132,14 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
             width: 100.0,
             height: 100.0,
             child: CircularProgressIndicator(
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .primaryContainer,
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .secondaryContainer,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               strokeWidth: 6,
             ),
           ),
@@ -170,21 +149,21 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         });
         Navigator.pushReplacementNamed(
-            context, "/home", arguments: {
-          'tag': 'user',
-          'data': user,
-        },);
+          context,
+          "/home",
+          arguments: {
+            'tag': 'user',
+            'data': user,
+          },
+        );
       } on FirebaseAuthException catch (e) {
         setState(() {
           _isLoading = false;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
-              content: Text('User not found. Please sign up first!'),
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .error,
+              content: const Text('User not found. Please sign up first!'),
+              backgroundColor: Theme.of(context).colorScheme.error,
               elevation: 10,
               width: 240,
             ),
@@ -193,11 +172,8 @@ class _LoginScreenState extends State<LoginScreen> {
         if (e.code == 'user-not-found') {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('User not found. Please sign up first!'),
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .error,
+              content: const Text('User not found. Please sign up first!'),
+              backgroundColor: Theme.of(context).colorScheme.error,
               elevation: 120,
             ),
           );
@@ -208,11 +184,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               behavior: SnackBarBehavior.floating,
-              content: Text('Wrong Password'),
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .error,
+              content: const Text('Wrong Password'),
+              backgroundColor: Theme.of(context).colorScheme.error,
               elevation: 10,
               width: 240,
             ),

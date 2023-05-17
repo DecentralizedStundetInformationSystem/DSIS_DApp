@@ -305,5 +305,23 @@
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_termIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_courseID",
+        "type": "uint256"
+      }
+    ],
+    "name": "upAttendance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]

@@ -1,6 +1,4 @@
-﻿import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'log_in_screen.dart';
 
@@ -25,91 +23,121 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text('Sign Up'),
+        title: const Text('Sign Up'),
         centerTitle: true,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Form(
-            key: formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (input) =>
-                        input!.isEmpty ? 'Please enter your school email' : null,
+        child: Form(
+          key: formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: _isLoading
+                ? Center(
+                    child: SizedBox(
+                      width: 100.0,
+                      height: 100.0,
+                      child: CircularProgressIndicator(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        strokeWidth: 6,
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Email')),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: TextFormField(
+                          controller: emailController,
+                          decoration: const InputDecoration(
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              labelText: 'john.doe@dsis.com'),
+                          validator: (input) => input!.isEmpty
+                              ? 'Please enter your school email'
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Align(
+                          alignment: Alignment.centerLeft, child: Text('ID')),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: TextFormField(
+                          controller: idController,
+                          decoration: const InputDecoration(
+                              labelText: '20230602001',
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never),
+                          validator: (input) => input!.isEmpty
+                              ? 'Please enter your school ID'
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Faculty'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: TextFormField(
+                          controller: facultyController,
+                          decoration: const InputDecoration(
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              labelText: 'Engineering'),
+                          validator: (input) => input!.isEmpty
+                              ? 'Please enter your faculty'
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Department'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: TextFormField(
+                          controller: departmentController,
+                          decoration: const InputDecoration(
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              labelText: 'Software Engineering'),
+                          validator: (input) => input!.isEmpty
+                              ? 'Please enter your department'
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          await signUp(context);
+                          showPasswordDialog(context);
+                        },
+                        child: const Text('Sign up'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: idController,
-                    decoration: const InputDecoration(labelText: 'ID'),
-                    validator: (input) =>
-                        input!.isEmpty ? 'Please enter your school ID' : null,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: facultyController,
-                    decoration: const InputDecoration(labelText: 'Faculty'),
-                    validator: (input) =>
-                        input!.isEmpty ? 'Please enter your faculty' : null,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: departmentController,
-                    decoration: const InputDecoration(labelText: 'Department'),
-                    validator: (input) =>
-                        input!.isEmpty ? 'Please enter your department' : null,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await signUp(context);
-                      showPasswordDialog(context);
-                    },
-                    child: const Text('Sign up'),
-                  ),
-                ],
-              ),
-            ),
           ),
-            if (_isLoading)
-              const Opacity(
-                opacity: 0.5,
-                child: ModalBarrier(
-                  dismissible: false,
-                  color: Colors.black,
-                ),
-              ),
-            if (_isLoading)
-              Center(
-                child: SizedBox(
-                  width: 100.0,
-                  height: 100.0,
-                  child: CircularProgressIndicator(
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    strokeWidth: 6,
-                  ),
-                ),
-              ),
-          ]
         ),
       ),
     );
   }
 
-Future<void> signUp(BuildContext context) async {
-     if (formKey.currentState!.validate()) {
-       setState(() {
-         _isLoading = true;
-       });
+  Future<void> signUp(BuildContext context) async {
+    if (formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
       String email = emailController.text;
       List<String> parts = email.split('@');
       String username = parts[0];
@@ -127,13 +155,13 @@ Future<void> signUp(BuildContext context) async {
           'regYear': currentYear.toString()
         },
       );
-       setState(() {
-         _isLoading = false;
-       });
+      setState(() {
+        _isLoading = false;
+      });
       showPasswordDialog(context);
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
+          const SnackBar(
             behavior: SnackBarBehavior.floating,
             content: Text('Enrollment Successful!'),
             backgroundColor: Color(0xFFa6e3a1),
@@ -143,9 +171,10 @@ Future<void> signUp(BuildContext context) async {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
+          SnackBar(
             behavior: SnackBarBehavior.floating,
-            content: Text('Enrollment failed. ${response.statusCode} ${response.body}'),
+            content: Text(
+                'Enrollment failed. ${response.statusCode} ${response.body}'),
             backgroundColor: Theme.of(context).colorScheme.error,
             elevation: 10,
             width: 240,
@@ -155,13 +184,12 @@ Future<void> signUp(BuildContext context) async {
     }
   }
 }
+
 void showPasswordDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        
-        
         title: const Text('Important Information'),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         actionsAlignment: MainAxisAlignment.center,
@@ -173,7 +201,7 @@ void showPasswordDialog(BuildContext context) {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
           ),
@@ -182,5 +210,3 @@ void showPasswordDialog(BuildContext context) {
     },
   );
 }
-
-

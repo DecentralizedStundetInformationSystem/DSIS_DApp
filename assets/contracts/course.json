@@ -47,6 +47,19 @@
   },
   {
     "inputs": [],
+    "name": "attendance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "courseCode",
     "outputs": [
       {
@@ -120,6 +133,19 @@
       {
         "internalType": "uint256",
         "name": "grade",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAttendance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -279,6 +305,13 @@
       }
     ],
     "name": "setOverallGrade",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "upAttendance",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
