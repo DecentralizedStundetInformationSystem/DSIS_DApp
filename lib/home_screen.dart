@@ -424,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: screenWidth,
                       height: student.terms.isNotEmpty
                           ? screenHeight * 0.07 +
-                              (0.07 *
+                              (0.05 *
                                   student.terms[0].courses.length *
                                   screenHeight)
                           : 100,
